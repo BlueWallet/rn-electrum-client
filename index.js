@@ -61,7 +61,9 @@ class ElectrumClient extends Client {
     this.timeout = setTimeout(() => {
       if (this.timeLastCall !== 0 && new Date().getTime() > this.timeLastCall + 5000) {
         const pingTimer = setTimeout(() => {
-          this.onError(new Error('keepalive ping timeout'));
+          if (this.timeout != null) {
+            this.onError(new Error('keepalive ping timeout'));
+          }
         }, 9000);
         this.server_ping().catch((reason) => {
           console.log('keepalive ping failed because of', reason);
@@ -75,6 +77,7 @@ class ElectrumClient extends Client {
     super.close();
     if (this.timeout != null) {
       clearTimeout(this.timeout);
+      this.timeout = null;
     }
     this.reconnect = this.reconnect = this.onClose = this.keepAlive = () => {}; // dirty hack to make it stop reconnecting
   }
